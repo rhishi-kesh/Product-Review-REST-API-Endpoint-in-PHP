@@ -6,7 +6,7 @@
     header('Access-Control-Allow-Headers: Content-Type');
 
     if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-        echo json_encode(['error' => 'Invalid request method. Only POST is allowed.']);
+        echo json_encode(['error' => 'Invalid request method. Only POST is allowed.', 'status' => false]);
         exit;
     }
 
@@ -17,17 +17,17 @@
     $review = isset($input['review']) ? trim($input['review']) : null;
 
     if (is_null($product_id) || $product_id <= 0) {
-        echo json_encode(['error' => 'Invalid product ID.']);
+        echo json_encode(['error' => 'Product ID should be a integer value.', 'status' => false]);
         exit;
     }
 
     if (is_null($user_id) || $user_id <= 0) {
-        echo json_encode(['error' => 'Invalid user ID.']);
+        echo json_encode(['error' => 'Product ID should be a integer value.', 'status' => false]);
         exit;
     }
 
     if (empty($review)) {
-        echo json_encode(['error' => 'Review text cannot be empty.']);
+        echo json_encode(['error' => 'Review text cannot be empty.', 'status' => false]);
         exit;
     }
 
@@ -44,7 +44,7 @@
 
     // Check connection
     if ($mysqli->connect_error) {
-        echo json_encode(['error' => 'Database connection failed: ' . $mysqli->connect_error]);
+        echo json_encode(['error' => 'Database connection failed: ' . $mysqli->connect_error, 'status' => false]);
         exit;
     }
 
@@ -56,12 +56,15 @@
         $stmt->bind_param('iiss', $product_id, $user_id, $review, $date);
         if ($stmt->execute()) {
             $response['message'] = 'Review submitted successfully.';
+            $response['status'] = true;
         } else {
-            $response['error'] = 'Execute error: ' . $stmt->error;
+            $response['error'] = 'Somthing went wrong! Review not submited.';
+            $response['status'] = false;
         }
         $stmt->close();
     } else {
-        $response['error'] = 'Prepare error: ' . $mysqli->error;
+        $response['error'] = 'Sorry, Somthing went wrong!';
+        $response['status'] = false;
     }
 
     // Close connection
